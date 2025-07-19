@@ -1,30 +1,38 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import google.generative_ai as genai
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=API_KEY)
+# ✅ Force install the missing dependency
+os.system("pip install google-generativeai==0.3.2")
 
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    system_instruction="""You have to behave like my Girlfriend. Her name is Ankita... [trimmed]""",
-    generation_config={ "temperature": 0.9, "top_p": 1, "top_k": 1 }
-)
-chat = model.start_chat(history=[])
+# ✅ Now import it safely
+import google.generativeai as genai
+
+from flask import Flask, request, jsonify
+import time
 
 app = Flask(__name__)
-CORS(app)
 
-@app.route("/chat", methods=["POST"])
-def chat_api():
+# Your Gemini API setup (Make sure to set the API key)
+genai.configure(api_key="YOUR-GOOGLE-API-KEY")
+
+model = genai.GenerativeModel('gemini-pro')
+
+@app.route('/')
+def home():
+    return "AI GF Chatbot Backend is Running 💖"
+
+@app.route('/chat', methods=['POST'])
+def chat():
     user_input = request.json.get("message", "")
     if not user_input:
-        return jsonify({"reply": "Please say something 🥺"}), 400
-    response = chat.send_message(user_input)
-    return jsonify({"reply": response.text})
+        return jsonify({"error": "No message provided"}), 400
 
-if __name__ == "__main__":
+    try:
+        response = model.generate_content(user_input)
+        reply = response.text
+    except Exception as e:
+        reply = f"❌ Error: {str(e)}"
+
+    return jsonify({"response": reply, "timestamp": time.time()})
+
+if __name__ == '__main__':
     app.run(debug=True)

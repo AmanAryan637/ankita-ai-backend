@@ -12,7 +12,7 @@ import time
 app = Flask(__name__)
 
 # Your Gemini API setup (Make sure to set the API key)
-genai.configure(api_key="YOUR-GOOGLE-API-KEY")
+genai.configure(api_key="AIzaSyBN4bNEzD3OLO2BIoSpAdOY7hX_ab-8sUY")
 
 model = genai.GenerativeModel('gemini-pro')
 
